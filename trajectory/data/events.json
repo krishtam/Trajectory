@@ -1,0 +1,27 @@
+{
+    "MarketShock": {
+        "name": "Market Shock",
+        "description": "A sudden downturn in the market has affected your resources.",
+        "type": "negative"
+    },
+    "FundingEvent": {
+        "name": "Funding Boost",
+        "description": "You've received an unexpected injection of capital.",
+        "type": "positive"
+    },
+    "OpportunityWindow": {
+        "name": "Opportunity Knocks",
+        "description": "A new window of opportunity has opened up, boosting your reputation.",
+        "type": "positive"
+    },
+    "CompetitorAdvance": {
+        "name": "Competitor Move",
+        "description": "A competitor has made a significant advance in the field.",
+        "type": "negative"
+    },
+    "RegulatoryChange": {
+        "name": "Regulatory Shift",
+        "description": "New regulations have been introduced, increasing market pressure.",
+        "type": "neutral"
+    }
+}
