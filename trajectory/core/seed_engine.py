@@ -168,8 +168,8 @@ class WorldConfig:
         win_condition = WinConditionConfig(
             type="threshold",
             metric=CAREER_TAXONOMY[pillar]["currency_label"],
-            target_value=starting_resource * 1.5,
-            time_limit_cycles=rng.integers(4, 7)
+            target_value=starting_resource * 2.2,
+            time_limit_cycles=rng.integers(6, 9)
         )
 
         # Extra draws for Scene Objects as per Part 4

@@ -56,6 +56,10 @@ class TrajectoryGame:
 
         self.active_challenge = None
         self.challenge_rng = None
+        self.notification = None
+        self.notification_start = 0
+        self.difficulty_adj = [0,0,0,0,0]
+        self.pressure_level = 0.5
 
     def run(self):
         while True:
@@ -92,7 +96,12 @@ class TrajectoryGame:
 
         elif self.state == GameState.WORLD_VIEW:
             now = pygame.time.get_ticks()
-            if now - self.last_cycle_time > 10000: # 10 seconds per cycle in view
+            self.pressure_level = self.world_state.pressure_level
+
+            if self.notification and now - self.notification_start > 3000:
+                self.notification = None
+
+            if now - self.last_cycle_time > 15000: # 15 seconds of immersion
                 self.last_cycle_time = now
                 self.world_state.cycle += 1
 
@@ -109,7 +118,8 @@ class TrajectoryGame:
                     event = sample_next_event(self.event_network, evidence, WorldRNG(self.world_state.config.seed + self.world_state.cycle))
                     if event:
                         self.world_state.apply_event(event, self.world_state.config)
-                        print(f"Event Fired: {event}")
+                        self.notification = f"ALERT: {event} DETECTED"
+                        self.notification_start = now
 
                     # 2. Trigger challenge
                     self.start_challenge()
@@ -120,10 +130,10 @@ class TrajectoryGame:
                 # 1. Update difficulty calibrator
                 features = np.array([0, 0, result.performance, 0, self.world_state.pressure_level, self.world_state.cycle / 10.0])
                 self.calibrator.update(features, result.performance)
-                adj = self.calibrator.predict_difficulty_adjustment(features)
+                self.difficulty_adj = self.calibrator.predict_difficulty_adjustment(features)
 
                 # Apply adjustments to current config (in-memory)
-                self.world_state.config.challenges.signal_noise_level = np.clip(self.world_state.config.challenges.signal_noise_level + adj[0], 0, 1)
+                self.world_state.config.challenges.signal_noise_level = np.clip(self.world_state.config.challenges.signal_noise_level + self.difficulty_adj[0], 0, 1)
 
                 # 2. Apply outcome
                 self.world_state.apply_challenge_outcome(result.performance, self.world_state.config)

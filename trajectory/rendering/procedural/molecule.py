@@ -46,7 +46,8 @@ def draw_molecule_diagram(surface: pygame.Surface, rng_display,
 
     # Draw atoms
     element_symbols = ["C", "H", "O", "N", "S", "P", "Fe", "Cl"]
-    font = pygame.font.SysFont("Arial", 12) # Fallback to SysFont for now
+    from trajectory.rendering.font_utils import get_font
+    font = get_font(12)
 
     for i, (ax, ay) in enumerate(atoms):
         pressure = world_data.get("pressure_level", 0.5)

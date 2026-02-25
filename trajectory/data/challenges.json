@@ -1,0 +1,56 @@
+{
+    "Expert/Chemist": {
+        "Signal Reading": [
+            {"prompt": "Analyze the spectral peak for impurities in the latest batch.", "correct": "98.2% Purity", "options": ["98.2% Purity", "85.1% Purity", "91.5% Purity"]},
+            {"prompt": "Identify the catalyst that optimizes the exothermic reaction.", "correct": "Platinum Catalyst", "options": ["Platinum Catalyst", "Iron Oxide", "Nickel Mesh"]},
+            {"prompt": "Check pH balance of the buffer solution.", "correct": "pH 7.4", "options": ["pH 7.4", "pH 6.2", "pH 8.1"]}
+        ],
+        "Resource Allocation": [
+            {"prompt": "Distribute lab funding across active research projects.", "targets": ["Nanotech Research", "Bio-reagent Safety", "Spectral Analysis"]},
+            {"prompt": "Assign personnel hours to maximize publication output.", "targets": ["Data Entry", "Experimentation", "Peer Review"]},
+            {"prompt": "Allocate supply budget for next quarter.", "targets": ["Consumables", "Equipment", "Chemical Disposal"]}
+        ],
+        "Sequence Judgment": [
+            {"prompt": "Standard Operating Procedure for Acid Dilution.", "steps": ["Measure Water", "Add Acid Slowly", "Stir Constantly", "Monitor Temp", "Label Container"]},
+            {"prompt": "Process for High-Performance Liquid Chromatography.", "steps": ["Prepare Mobile Phase", "Inject Sample", "Run Gradient", "Detect Peaks", "Integrate Area"]},
+            {"prompt": "Safety protocol for handling volatile compounds.", "steps": ["Check Fume Hood", "Don PPE", "Open Container", "Perform Transfer", "Reseal Bottle"]}
+        ],
+        "Pressure Response": [
+            {"prompt": "A containment unit in Lab B is showing a pressure spike!", "options": ["Vent to Scrubber", "Emergency Shutdown", "Recycle Coolant"]},
+            {"prompt": "The primary grant deadline was moved up by 48 hours!", "options": ["Crunch Data", "Submit Preliminary", "Request Extension"]},
+            {"prompt": "A regional inspector has arrived unannounced!", "options": ["Quick Cleanup", "Review Records", "Escort Inspector"]}
+        ],
+        "Negotiation": [
+            {"prompt": "Negotiate your annual research grant with the University Dean.", "subject": "Grant Funding", "agent_role": "University Dean"},
+            {"prompt": "Secure a supply agreement for rare reagents with a chemical vendor.", "subject": "Reagent Pricing", "agent_role": "Vendor Rep"},
+            {"prompt": "Discuss intellectual property rights with the tech transfer office.", "subject": "Patent Split", "agent_role": "IP Officer"}
+        ]
+    },
+    "Allocator/Trader": {
+        "Signal Reading": [
+            {"prompt": "Identify the volume anomaly in the high-frequency tick data.", "correct": "12:05 Spike", "options": ["12:05 Spike", "09:30 Open", "15:45 Close"]},
+            {"prompt": "Which asset shows the strongest bullish divergence?", "correct": "Asset Theta", "options": ["Asset Theta", "Asset Phi", "Asset Sigma"]},
+            {"prompt": "Spot the signal from the noise in the sentiment stream.", "correct": "Accumulation", "options": ["Accumulation", "Distribution", "Wash Trading"]}
+        ],
+        "Resource Allocation": [
+            {"prompt": "Allocate portfolio capital across sectors based on risk profile.", "targets": ["Tech Growth", "Energy Value", "Consumer Staples"]},
+            {"prompt": "Distribute margin limits across current positions.", "targets": ["Short Index", "Long Crypto", "Gold Hedge"]},
+            {"prompt": "Allocate research bandwidth for upcoming IPOs.", "targets": ["Fintech", "Biotech", "Green Tech"]}
+        ],
+        "Sequence Judgment": [
+            {"prompt": "Execution sequence for a Large Block Trade.", "steps": ["Check Liquidity", "Slice Order", "Execute VWAP", "Confirm Fill", "Post-Trade Review"]},
+            {"prompt": "Morning routine for market analysis.", "steps": ["Check Asia Close", "Read Overnight News", "Review Macro Data", "Set Entry Levels", "Sync with Team"]},
+            {"prompt": "Protocol for algorithmic model deployment.", "steps": ["Backtest Code", "Risk Check", "Paper Trade", "Live Beta", "Full Scale"]}
+        ],
+        "Pressure Response": [
+            {"prompt": "A sudden Fed rate hike is causing market-wide volatility!", "options": ["Hedge Positions", "Liquidate Non-Core", "Wait for Close"]},
+            {"prompt": "Your primary prime broker has reduced your leverage limits!", "options": ["Reduce Size", "Post Collateral", "Find New Broker"]},
+            {"prompt": "Breaking news: Major exchange hack in progress!", "options": ["Withdraw Funds", "Short Sector", "Verify Exposure"]}
+        ],
+        "Negotiation": [
+            {"prompt": "Negotiate commission rates with a new clearing firm.", "subject": "Bps per Trade", "agent_role": "Clearing Rep"},
+            {"prompt": "Pitch your fund strategy to a High-Net-Worth individual.", "subject": "AUM Allocation", "agent_role": "Potential Investor"},
+            {"prompt": "Renegotiate your bonus structure with the managing director.", "subject": "Carry Payout", "agent_role": "Managing Director"}
+        ]
+    }
+}
