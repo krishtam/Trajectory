@@ -45,4 +45,4 @@ Trajectory implements adaptive difficulty through **Online Ridge Regression**.
 
 The rendering engine uses a layered approach in Pygame:
 - **Procedural Generators:** Create pillar-specific visuals. The Expert pillar features stylized medical anatomy and animated vitals, while the Allocator pillar features high-fidelity candlestick charts and live order book depth visualizations.
-- **Asset Colorization:** Grayscale assets are dynamically tinted to the pillar's primary color at runtime to preserve memory and ensure thematic consistency.
+- **Programmatic Assets:** All professional icons and portraits are drawn directly in code using `pygame.draw` functions (see `trajectory/rendering/programmatic_assets.py`). This ensures style consistency, infinite scalability, and no reliance on external image files.

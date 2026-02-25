@@ -1,5 +1,6 @@
 import pygame
 import os
+from trajectory.rendering.programmatic_assets import ProgrammaticAssets
 
 class AssetLoader:
     def __init__(self, base_path: str = "trajectory/assets"):
@@ -8,28 +9,23 @@ class AssetLoader:
 
     def get_asset(self, category: str, name: str) -> pygame.Surface:
         """
-        Retrieves an asset from assets/{category}/{name}.png
+        Overhauled: Uses ProgrammaticAssets instead of loading PNGs.
         """
-        path = os.path.join(self.base_path, category, f"{name}.png")
-        if path in self.cache:
-            return self.cache[path]
+        # We ignore category for now and use the name to look up drawing functions.
+        # This aligns with the "ditch PNG pipeline" requirement.
 
-        if not os.path.exists(path):
-            # Fallback to a placeholder surface
-            surf = pygame.Surface((128, 128), pygame.SRCALPHA)
-            pygame.draw.rect(surf, (150, 150, 150), (0, 0, 128, 128), 2)
-            return surf
+        cache_key = (name)
+        if cache_key in self.cache:
+            return self.cache[cache_key]
 
-        surf = pygame.image.load(path).convert_alpha()
-        self.cache[path] = surf
+        # Determine size based on name hints or default
+        size = (256, 256)
+        if "icon" in name or "portrait" in name:
+            size = (128, 128)
+
+        surf = ProgrammaticAssets.get_surface(name, size=size)
+        self.cache[cache_key] = surf
         return surf
 
     def load_object(self, pillar: str, obj_name: str, color: tuple = None) -> pygame.Surface:
-        # Map pillar to directory
-        dir_map = {
-            "Expert": "expert",
-            "Allocator": "allocator",
-            "Builder": "builder"
-        }
-        category = os.path.join("objects", dir_map.get(pillar, "expert"))
-        return self.get_asset(category, obj_name)
+        return self.get_asset("objects", obj_name)

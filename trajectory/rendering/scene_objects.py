@@ -15,9 +15,8 @@ def place_scene_objects(config, theme, asset_loader):
     if not available_objects:
         return []
 
-    n = rng.integers(4, 8)
-    for _ in range(n):
-        obj_name = rng.choice(available_objects)
+    n = len(available_objects)
+    for obj_name in available_objects:
         surf = asset_loader.load_object(config.pillar, obj_name, color=theme["primary"])
 
         # Random position in main canvas (240, 48) to (1280, 656)

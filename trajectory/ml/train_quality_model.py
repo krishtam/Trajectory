@@ -11,8 +11,9 @@ sys.path.append(os.getcwd())
 from trajectory.core.seed_engine import WorldConfig
 from trajectory.core.career_taxonomy import CAREER_TAXONOMY
 from trajectory.ml.analytical_scorer import analytical_quality_score
+from trajectory.ml.logger import SimulationLogger
 
-def generate_training_data(n_samples: int = 100):
+def generate_training_data(n_samples: int = 500, logger=None):
     global_rng = np.random.default_rng(42)
     X = []
     y = []
@@ -20,7 +21,7 @@ def generate_training_data(n_samples: int = 100):
     pillars = list(CAREER_TAXONOMY.keys())
 
     for i in range(n_samples):
-        if i % 10 == 0: print(f"Generating sample {i}...")
+        if i % 50 == 0: print(f"Generating sample {i}...")
         seed = int(global_rng.integers(0, 2**32))
         pillar = global_rng.choice(pillars)
         career = global_rng.choice(CAREER_TAXONOMY[pillar]["careers"])
@@ -28,15 +29,21 @@ def generate_training_data(n_samples: int = 100):
         config = WorldConfig.from_seed(seed, pillar, career)
         quality = analytical_quality_score(config)
 
-        X.append(config.to_vector())
+        vector = config.to_vector()
+        X.append(vector)
         y.append(quality)
+
+        if logger:
+            logger.log_world_config(vector, quality)
 
     return np.array(X), np.array(y)
 
 def train_quality_model():
-    print("Starting training data generation...")
-    n_samples = 200 # Increased for better metrics
-    X, y = generate_training_data(n_samples=n_samples)
+    logger = SimulationLogger()
+    print(f"Starting training data collection. Run ID: {logger.run_id}")
+
+    n_samples = 500
+    X, y = generate_training_data(n_samples=n_samples, logger=logger)
 
     print("Training XGBoost model...")
     model = xgb.XGBRegressor(
@@ -49,32 +56,33 @@ def train_quality_model():
 
     model.fit(X, y)
 
-    os.makedirs("trajectory/ml/models", exist_ok=True)
-    joblib.dump(model, "trajectory/ml/models/seed_quality.pkl")
-    print("Model trained and saved to trajectory/ml/models/seed_quality.pkl")
+    model_dir = "trajectory/ml/models"
+    os.makedirs(model_dir, exist_ok=True)
+    joblib.dump(model, os.path.join(model_dir, "seed_quality.pkl"))
+    print(f"Model trained and saved to {model_dir}/seed_quality.pkl")
 
-    # --- Generate Presentation Graphics ---
-    print("Generating presentation graphics...")
+    # --- Generate Metrics & Visuals ---
+    print("Generating training pipeline visuals...")
 
     # 1. Quality Score Distribution
     plt.figure(figsize=(10, 6))
-    plt.hist(y, bins=20, color='skyblue', edgecolor='black', alpha=0.7)
-    plt.title('Distribution of Generated World Quality Scores')
-    plt.xlabel('Quality Score (0-1)')
-    plt.ylabel('Frequency')
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.savefig('trajectory/ml/models/quality_distribution.png')
+    plt.hist(y, bins=30, color='#2E5090', edgecolor='white', alpha=0.8)
+    plt.title('World Generation Quality Scrutiny (Analytical Labels)')
+    plt.xlabel('Analytical Score')
+    plt.ylabel('Seed Frequency')
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
+    plt.savefig(os.path.join(logger.session_dir, 'quality_distribution.png'))
     plt.close()
 
     # 2. Feature Importance
     plt.figure(figsize=(12, 8))
-    xgb.plot_importance(model, max_num_features=15, height=0.7, color='coral')
-    plt.title('XGBoost Feature Importance for Seed Quality')
+    xgb.plot_importance(model, max_num_features=15, height=0.7, color='#2E5090')
+    plt.title('XGBoost Determinant Weighting (Feature Importance)')
     plt.tight_layout()
-    plt.savefig('trajectory/ml/models/feature_importance.png')
+    plt.savefig(os.path.join(logger.session_dir, 'determinant_importance.png'))
     plt.close()
 
-    print("Presentation graphics saved to trajectory/ml/models/")
+    print(f"Pipeline data and visuals organized in {logger.session_dir}")
 
 if __name__ == "__main__":
     train_quality_model()

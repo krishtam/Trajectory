@@ -12,6 +12,7 @@ from trajectory.core.narrative import NarrativeEngine
 
 from trajectory.ml.quality_model import load_quality_model, get_good_seed
 from trajectory.ml.difficulty_calibrator import DifficultyCalibrator
+from trajectory.ml.logger import SimulationLogger
 
 from trajectory.rendering.themes import get_theme
 from trajectory.rendering.asset_loader import AssetLoader
@@ -55,6 +56,7 @@ class TrajectoryGame:
         self.particles = None
         self.event_network = None
         self.calibrator = DifficultyCalibrator()
+        self.logger = SimulationLogger()
 
         self.active_challenge = None
         self.notification = None
@@ -115,6 +117,9 @@ class TrajectoryGame:
                 # Sample Event
                 evidence = self.world_state.to_evidence_dict()
                 event = sample_next_event(self.event_network, evidence, WorldRNG(self.world_state.config.seed + self.world_state.cycle))
+
+                self.logger.log_bayesian_inference(self.world_state.cycle, evidence, event, "sampled")
+
                 if event:
                     self.world_state.apply_event(event, self.world_state.config)
                     self.notification = f"PROTOCOL ALERT: {event.upper()}"
@@ -130,6 +135,8 @@ class TrajectoryGame:
                 feats = np.array([0, 0, result.performance, 0, self.world_state.pressure_level, self.world_state.cycle / 5.0])
                 self.calibrator.update(feats, result.performance)
                 self.difficulty_adj = self.calibrator.predict_difficulty_adjustment(feats)
+
+                self.logger.log_regression_update(self.world_state.cycle, feats, result.performance, self.calibrator.w, self.difficulty_adj)
 
                 self.world_state.apply_challenge_outcome(result.performance, self.world_state.config)
                 self.world_state.cycle += 1
