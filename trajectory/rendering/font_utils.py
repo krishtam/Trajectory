@@ -8,7 +8,7 @@ def get_font(size, bold=False):
     font_name = "Inter-Bold.ttf" if bold else "Inter-Regular.ttf"
     path = os.path.join("trajectory", "assets", "fonts", font_name)
 
-    if os.path.exists(path):
+    if os.path.exists(path) and os.path.getsize(path) > 0:
         try:
             return pygame.font.Font(path, size)
         except:
@@ -18,7 +18,7 @@ def get_font(size, bold=False):
 
 def get_mono_font(size):
     path = os.path.join("trajectory", "assets", "fonts", "JetBrainsMono-Regular.ttf")
-    if os.path.exists(path):
+    if os.path.exists(path) and os.path.getsize(path) > 0:
         try:
             return pygame.font.Font(path, size)
         except:

@@ -44,5 +44,5 @@ Trajectory implements adaptive difficulty through **Online Ridge Regression**.
 ## 6. Rendering & Procedural Visuals
 
 The rendering engine uses a layered approach in Pygame:
-- **Procedural Generators:** Create pillar-specific visuals (e.g., molecule diagrams using seeded node placement, candlestick charts using Matplotlib-to-Pygame blitting).
+- **Procedural Generators:** Create pillar-specific visuals. The Expert pillar features stylized medical anatomy and animated vitals, while the Allocator pillar features high-fidelity candlestick charts and live order book depth visualizations.
 - **Asset Colorization:** Grayscale assets are dynamically tinted to the pillar's primary color at runtime to preserve memory and ensure thematic consistency.

@@ -36,7 +36,7 @@ def headless_simulate(config: WorldConfig, n: int = 100) -> float:
 
             state.apply_challenge_outcome(performance, config)
 
-            if state.check_win(config.win_condition):
+            if state.check_win():
                 won = True
                 break
 

@@ -1,27 +1,37 @@
 {
+    "SurgicalComplication": {
+        "name": "Surgical Complication",
+        "description": "An unexpected complication occurred during the procedure.",
+        "type": "negative"
+    },
+    "AdminPressure": {
+        "name": "Administrative Pressure",
+        "description": "Hospital administration is scrutinizing your recent surgical outcomes.",
+        "type": "negative"
+    },
+    "BloodShortage": {
+        "name": "Resource Shortage",
+        "description": "A critical shortage of blood supplies is affecting hospital operations.",
+        "type": "negative"
+    },
     "MarketShock": {
         "name": "Market Shock",
         "description": "A sudden downturn in the market has affected your resources.",
         "type": "negative"
     },
-    "FundingEvent": {
-        "name": "Funding Boost",
-        "description": "You've received an unexpected injection of capital.",
-        "type": "positive"
+    "FedAnnouncement": {
+        "name": "Fed Announcement",
+        "description": "Federal Reserve policy changes are inducing high market volatility.",
+        "type": "neutral"
     },
-    "OpportunityWindow": {
-        "name": "Opportunity Knocks",
-        "description": "A new window of opportunity has opened up, boosting your reputation.",
-        "type": "positive"
-    },
-    "CompetitorAdvance": {
-        "name": "Competitor Move",
-        "description": "A competitor has made a significant advance in the field.",
+    "WhaleLiquidation": {
+        "name": "Whale Liquidation",
+        "description": "A major institutional player is offloading massive positions.",
         "type": "negative"
     },
-    "RegulatoryChange": {
-        "name": "Regulatory Shift",
-        "description": "New regulations have been introduced, increasing market pressure.",
-        "type": "neutral"
+    "MarketRally": {
+        "name": "Market Rally",
+        "description": "Positive sentiment is driving sector-wide gains.",
+        "type": "positive"
     }
 }

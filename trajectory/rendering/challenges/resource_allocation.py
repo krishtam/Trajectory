@@ -9,13 +9,13 @@ class ResourceAllocationChallenge(Challenge):
             self.prompt_text = self.scenario["prompt"]
             self.targets = self.scenario["targets"]
         else:
-            self.prompt_text = "Allocate resources."
-            self.targets = ["Alpha", "Beta", "Gamma"]
+            self.prompt_text = "Allocate professional bandwidth."
+            self.targets = ["Focus A", "Focus B", "Focus C"]
 
-        self.font = get_font(20)
+        self.font = get_font(18)
         self.header_font = get_font(28, bold=True)
         self.allocation = [0] * len(self.targets)
-        self.ideal = [50, 30, 20] # Hidden ideal
+        self.ideal = [40, 40, 20] # Hidden ideal
 
     def update(self, events):
         for event in events:
@@ -34,27 +34,32 @@ class ResourceAllocationChallenge(Challenge):
 
     def draw(self, surface):
         overlay = pygame.Surface((1280, 720), pygame.SRCALPHA)
-        overlay.fill((10, 20, 30, 230))
+        overlay.fill((10, 20, 30, 240))
         surface.blit(overlay, (0, 0))
 
-        pygame.draw.rect(surface, self.theme["primary"], (340, 120, 600, 480), 2)
+        pygame.draw.rect(surface, self.theme["primary"], (340, 80, 600, 560), 2, border_radius=15)
 
-        title = self.header_font.render("RESOURCE ALLOCATION", True, self.theme["primary"])
-        surface.blit(title, (640 - title.get_width()//2, 150))
+        title = self.header_font.render("RESOURCE ALLOCATION", True, self.theme["accent"])
+        surface.blit(title, (640 - title.get_width()//2, 110))
 
         prompt = self.font.render(self.prompt_text, True, (255, 255, 255))
-        surface.blit(prompt, (640 - prompt.get_width()//2, 200))
+        surface.blit(prompt, (640 - prompt.get_width()//2, 160))
 
-        instruction = self.font.render("(Press 1, 2, 3 to increment)", True, self.theme["accent"])
-        surface.blit(instruction, (640 - instruction.get_width()//2, 230))
+        hint = self.font.render("(PRESS 1, 2, 3 TO INCREMENT PERCENTAGE)", True, self.theme["accent"])
+        surface.blit(hint, (640 - hint.get_width()//2, 200))
+
+        total = sum(self.allocation)
+        total_label = self.font.render(f"TOTAL DEPLOYED: {total}%", True, (100, 255, 100) if total <= 100 else (255, 100, 100))
+        surface.blit(total_label, (640 - total_label.get_width()//2, 240))
 
         for i, target in enumerate(self.targets):
-            y = 280 + i * 80
-            pygame.draw.rect(surface, (40, 40, 50), (440, y, 400, 40))
-            pygame.draw.rect(surface, self.theme["primary"], (440, y, int(4 * self.allocation[i]), 40))
-            label = self.font.render(f"{target}: {self.allocation[i]}%", True, (255, 255, 255))
-            surface.blit(label, (860, y + 5))
+            y = 300 + i * 80
+            pygame.draw.rect(surface, (30, 35, 50), (440, y, 400, 45), border_radius=10)
+            pygame.draw.rect(surface, self.theme["primary"], (440, y, int(4 * self.allocation[i]), 45), border_radius=10)
 
-        pygame.draw.rect(surface, self.theme["primary"], (590, 520, 100, 50))
-        sub_label = self.font.render("DEPLOY", True, self.theme["background"])
-        surface.blit(sub_label, (640 - sub_label.get_width()//2, 532))
+            label = self.font.render(f"{target.upper()}: {self.allocation[i]}%", True, (255, 255, 255))
+            surface.blit(label, (460, y + 10))
+
+        pygame.draw.rect(surface, self.theme["accent"], (590, 550, 100, 50), border_radius=10)
+        sub_label = get_font(16, bold=True).render("DEPLOY", True, self.theme["background"])
+        surface.blit(sub_label, (640 - sub_label.get_width()//2, 562))

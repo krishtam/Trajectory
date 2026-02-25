@@ -8,6 +8,7 @@ from trajectory.core.seed_engine import WorldConfig
 from trajectory.core.simulation import WorldState
 from trajectory.core.world_rng import WorldRNG
 from trajectory.core.bayesian_network import build_event_network, sample_next_event
+from trajectory.core.narrative import NarrativeEngine
 
 from trajectory.ml.quality_model import load_quality_model, get_good_seed
 from trajectory.ml.difficulty_calibrator import DifficultyCalibrator
@@ -45,6 +46,7 @@ class TrajectoryGame:
 
         self.quality_model = load_quality_model()
         self.asset_loader = AssetLoader()
+        self.narrative_engine = NarrativeEngine()
 
         self.current_screen = CareerSelectScreen()
         self.world_state = None
@@ -55,11 +57,9 @@ class TrajectoryGame:
         self.calibrator = DifficultyCalibrator()
 
         self.active_challenge = None
-        self.challenge_rng = None
         self.notification = None
         self.notification_start = 0
         self.difficulty_adj = [0,0,0,0,0]
-        self.pressure_level = 0.5
 
     def run(self):
         while True:
@@ -91,53 +91,52 @@ class TrajectoryGame:
                 rng = WorldRNG(self.world_state.config.seed + 777)
                 self.particles = ParticleSystem(rng, self.theme, 1280, 720)
                 self.event_network = build_event_network(self.world_state.config.events)
+
+                # Start Day 1 Narrative
+                self.world_state.narrative_text = self.narrative_engine.get_day_text(self.world_state.config.career, 0)
+
                 self.state = GameState.WORLD_VIEW
                 self.last_cycle_time = pygame.time.get_ticks()
 
         elif self.state == GameState.WORLD_VIEW:
             now = pygame.time.get_ticks()
-            self.pressure_level = self.world_state.pressure_level
-
             if self.notification and now - self.notification_start > 3000:
                 self.notification = None
 
-            if now - self.last_cycle_time > 15000: # 15 seconds of immersion
+            if now - self.last_cycle_time > 12000: # 12s of immersion/story reading
                 self.last_cycle_time = now
-                self.world_state.cycle += 1
 
-                # Check end conditions
-                if self.world_state.check_win(self.world_state.config.win_condition):
+                # Check cycle limit
+                if self.world_state.cycle >= self.world_state.max_cycles:
                     self.state = GameState.END_SCREEN
-                    self.current_screen = EndScreen(True, self.world_state)
-                elif self.world_state.check_lose(self.world_state.config.win_condition):
-                    self.state = GameState.END_SCREEN
-                    self.current_screen = EndScreen(False, self.world_state)
-                else:
-                    # 1. Sample and apply event from Bayesian network
-                    evidence = self.world_state.to_evidence_dict()
-                    event = sample_next_event(self.event_network, evidence, WorldRNG(self.world_state.config.seed + self.world_state.cycle))
-                    if event:
-                        self.world_state.apply_event(event, self.world_state.config)
-                        self.notification = f"ALERT: {event} DETECTED"
-                        self.notification_start = now
+                    self.current_screen = EndScreen(self.world_state.check_win(), self.world_state)
+                    return
 
-                    # 2. Trigger challenge
-                    self.start_challenge()
+                # Sample Event
+                evidence = self.world_state.to_evidence_dict()
+                event = sample_next_event(self.event_network, evidence, WorldRNG(self.world_state.config.seed + self.world_state.cycle))
+                if event:
+                    self.world_state.apply_event(event, self.world_state.config)
+                    self.notification = f"PROTOCOL ALERT: {event.upper()}"
+                    self.notification_start = now
+
+                # Start Challenge
+                self.start_challenge()
 
         elif self.state == GameState.CHALLENGE:
             result = self.active_challenge.update(events)
             if result:
-                # 1. Update difficulty calibrator
-                features = np.array([0, 0, result.performance, 0, self.world_state.pressure_level, self.world_state.cycle / 10.0])
-                self.calibrator.update(features, result.performance)
-                self.difficulty_adj = self.calibrator.predict_difficulty_adjustment(features)
+                # Update Calibrator
+                feats = np.array([0, 0, result.performance, 0, self.world_state.pressure_level, self.world_state.cycle / 5.0])
+                self.calibrator.update(feats, result.performance)
+                self.difficulty_adj = self.calibrator.predict_difficulty_adjustment(feats)
 
-                # Apply adjustments to current config (in-memory)
-                self.world_state.config.challenges.signal_noise_level = np.clip(self.world_state.config.challenges.signal_noise_level + self.difficulty_adj[0], 0, 1)
-
-                # 2. Apply outcome
                 self.world_state.apply_challenge_outcome(result.performance, self.world_state.config)
-                self.world_state.active_challenge = None
+                self.world_state.cycle += 1
+
+                if self.world_state.cycle < self.world_state.max_cycles:
+                    self.world_state.narrative_text = self.narrative_engine.get_day_text(self.world_state.config.career, self.world_state.cycle)
+
                 self.active_challenge = None
                 self.state = GameState.WORLD_VIEW
                 self.last_cycle_time = pygame.time.get_ticks()
@@ -162,12 +161,13 @@ class TrajectoryGame:
         else:
             self.active_challenge = NegotiationChallenge(self.world_state.config, self.theme, rng)
 
-        self.world_state.active_challenge = self.active_challenge
-
     def draw(self):
         if self.state in [GameState.CAREER_SELECT, GameState.WORLD_BOOT, GameState.END_SCREEN]:
             self.current_screen.draw(self.screen)
         else:
+            # Transfer local main state to world state for renderer
+            self.world_state.notification = self.notification
+            self.world_state.active_challenge = self.active_challenge
             render_frame(self.screen, self.world_state, self.theme, self.scene_objects, self.particles)
         pygame.display.flip()
 

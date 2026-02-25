@@ -5,7 +5,15 @@ from trajectory.core.world_rng import WorldRNG
 STATES = ["dormant", "active", "stressed", "hostile", "cooperative"]
 STATE_INDEX = {state: i for i, state in enumerate(STATES)}
 
+# Base transition matrices for different archetypes
 BASE_MATRICES = {
+    "authority": np.array([
+        [0.7, 0.2, 0.05, 0.0, 0.05],
+        [0.1, 0.6, 0.2, 0.05, 0.05],
+        [0.05, 0.1, 0.5, 0.3, 0.05],
+        [0.0, 0.05, 0.2, 0.7, 0.05],
+        [0.2, 0.1, 0.1, 0.0, 0.6]
+    ]),
     "competitor": np.array([
         [0.6, 0.3,  0.05, 0.05, 0.0 ],
         [0.2, 0.4,  0.2,  0.1,  0.1 ],
@@ -13,29 +21,29 @@ BASE_MATRICES = {
         [0.05,0.1,  0.2,  0.55, 0.1 ],
         [0.3, 0.3,  0.1,  0.0,  0.3 ]
     ]),
+    "opportunity": np.array([
+        [0.8, 0.1, 0.0, 0.0, 0.1],
+        [0.2, 0.5, 0.1, 0.0, 0.2],
+        [0.1, 0.2, 0.4, 0.1, 0.2],
+        [0.0, 0.1, 0.2, 0.6, 0.1],
+        [0.1, 0.2, 0.1, 0.0, 0.6]
+    ])
 }
-
-# Fill other archetypes with the same base for now, can be tuned later
-for arch in ["authority", "gatekeeper", "opportunity", "dependency", "adversary"]:
-    if arch not in BASE_MATRICES:
-        BASE_MATRICES[arch] = BASE_MATRICES["competitor"].copy()
 
 def compute_transition_matrix(archetype: str, aggression: float,
                                loyalty: float, world_pressure: float) -> np.ndarray:
     base = BASE_MATRICES.get(archetype, BASE_MATRICES["competitor"]).copy()
 
-    # Aggression shifts probability mass toward hostile states
+    # Aggression shifts mass toward hostile/stressed states
     hostile_idx = STATE_INDEX["hostile"]
+    stressed_idx = STATE_INDEX["stressed"]
     dormant_idx = STATE_INDEX["dormant"]
-    shift = aggression * 0.15
-    base[:, hostile_idx] += shift
-    base[:, dormant_idx] -= shift
 
-    # World pressure amplifies stress transitions
-    stress_idx = STATE_INDEX["stressed"]
-    base[:, stress_idx] += world_pressure * 0.1
+    base[:, hostile_idx] += aggression * 0.15
+    base[:, stressed_idx] += world_pressure * 0.2
+    base[:, dormant_idx] -= (aggression * 0.1 + world_pressure * 0.1)
 
-    # Renormalize rows to sum to 1
+    # Renormalize
     base = np.clip(base, 0, 1)
     base = base / base.sum(axis=1, keepdims=True)
 
@@ -45,7 +53,7 @@ class AgentState:
     def __init__(self, config):
         self.config = config
         self.current_state = "active"
-        self.relationship = config.relationship
+        self.relationship = config.relationship # -1 to 1
 
     def update_state(self, world_pressure: float, rng: WorldRNG) -> str:
         matrix = compute_transition_matrix(
@@ -62,12 +70,6 @@ class AgentState:
         return self.current_state
 
     def update_relationship(self, delta: float):
-        """
-        R_{t+1} = R_t + α × Δ_decision - β × R_t × decay_rate
-        """
-        alpha = 0.1
-        beta = 0.05 # placeholder for base decay
-        decay_rate = 1.0 - self.config.loyalty
-
-        self.relationship = self.relationship + alpha * delta - beta * self.relationship * decay_rate
-        self.relationship = float(np.clip(self.relationship, -1.0, 1.0))
+        alpha = 0.15
+        decay = 0.05 * (1.0 - self.config.loyalty)
+        self.relationship = float(np.clip(self.relationship + alpha * delta - decay * self.relationship, -1.0, 1.0))

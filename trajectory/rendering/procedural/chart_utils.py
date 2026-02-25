@@ -8,31 +8,35 @@ from PIL import Image
 def generate_chart_surface(data: list, theme: dict,
                              chart_type: str = "line",
                              size_px: tuple = (400, 200)) -> pygame.Surface:
-    """Renders a matplotlib chart to a pygame Surface."""
+    """Renders a professional matplotlib chart to a pygame Surface."""
     figsize = (size_px[0]/100, size_px[1]/100)
-    bg = tuple(c/255 for c in theme["background"])
-    fg = tuple(c/255 for c in theme["primary"])
 
+    # Standard dark theme for charts
+    bg = tuple(c/255 for c in theme["background"])
+    fg = (0.4, 0.7, 1.0) # Light blue primary
+    accent = (0.4, 1.0, 0.6) # Light green
+
+    plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=figsize, facecolor=bg)
     ax.set_facecolor(bg)
 
     if chart_type == "line":
-        ax.plot(data, color=fg, linewidth=2, antialiased=True)
-        ax.fill_between(range(len(data)), data, alpha=0.15, color=fg)
+        ax.plot(data, color=accent, linewidth=2, antialiased=True, marker='o', markersize=4)
+        ax.fill_between(range(len(data)), data, alpha=0.2, color=accent)
     elif chart_type == "candlestick":
-        # data = list of (open, high, low, close) tuples
         for i, (o, h, l, c) in enumerate(data):
-            color = fg if c >= o else (0.9, 0.3, 0.3)
-            ax.plot([i, i], [l, h], color=color, linewidth=1)
-            ax.add_patch(plt.Rectangle((i-0.3, min(o,c)), 0.6, abs(c-o),
-                                        facecolor=color, edgecolor=color))
+            color = accent if c >= o else (1.0, 0.3, 0.3)
+            ax.plot([i, i], [l, h], color=color, linewidth=1.5)
+            # Draw candle body
+            rect = plt.Rectangle((i-0.3, min(o,c)), 0.6, abs(c-o), facecolor=color, edgecolor=color)
+            ax.add_patch(rect)
     elif chart_type == "bar":
-        ax.bar(range(len(data)), data, color=fg, alpha=0.8)
+        ax.bar(range(len(data)), data, color=fg, alpha=0.8, edgecolor='white')
 
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
-        spine.set_color(tuple(c/255 for c in theme["grid"]))
+        spine.set_visible(False)
 
     plt.tight_layout(pad=0.1)
 
